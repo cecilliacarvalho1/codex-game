@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Codex</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div id="menu-screen" class="screen active">
+        <img src="logo.png" alt="Logo" class="logo">
+        <button class="solid-button" onclick="showScreen('player-config-screen')">Jogar</button>
+        <button class="solid-button" onclick="showScreen('instructions-screen')">Instruções</button>
+    </div>
+
+    <div id="instructions-screen" class="screen">
+        <h1>Instruções</h1>
+        <p>
+            Bem-vindo ao Codex!<br><br>
+            Seu objetivo é adivinhar o termo de tecnologia com o mínimo de dicas. <br><br>
+            Os temas são: <strong>Ano, Coisa, Pessoa</strong> ou <strong>Lugar</strong>.<br><br>
+            <strong>Pontuação:</strong><br>
+            1ª Dica: +5 Pontos<br>
+            2ª Dica: +4 Pontos<br>
+            3ª Dica: +3 Pontos<br>
+            4ª Dica: +2 Pontos<br>
+            5ª Dica: +1 Ponto
+        </p>
+        <button class="solid-button" onclick="showScreen('menu-screen')">Voltar ao menu</button>
+    </div>
+
+    <div id="player-config-screen" class="screen">
+        <img src="logo_azul.png" alt="Logo Azul" class="logo">
+        <label for="player-name">Digite seu nome:</label>
+        <input type="text" id="player-name" placeholder="Seu nome aqui">
+        <button class="hollow-button" onclick="startGame()">Começar Jogo</button>
+        <button class="hollow-button" onclick="showScreen('menu-screen')">Voltar ao menu</button>
+    </div>
+
+    <div id="game-screen" class="screen">
+        <div class="game-header">
+            <span id="player-display">
+                <img src="jogador.png" alt="Ícone de Jogador" class="header-icon">
+                Jogador:
+            </span>
+            <span id="score-display">
+                <img src="pontos.png" alt="Ícone de Pontos" class="header-icon">
+                Pontos: 0
+            </span>
+        </div>
+
+        <div class="game-card">
+            <h2 id="theme-label">Categoria: N/A</h2>
+            <div id="dicas-area">Clique nos números para revelar as dicas!</div>
+            <div id="dica-buttons">
+                </div>
+        </div>
+
+        <div class="answer-area">
+            <input type="text" id="answer-input" placeholder="Sua resposta...">
+            <button id="ok-button" onclick="checkAnswer()">✔️</button>
+        </div>
+
+        <div class="game-footer">
+            <button onclick="confirmExit()">Sair</button>
+            <button onclick="skipCard()">Pular carta</button>
+            <button onclick="showCorrectAnswer()">Ver resposta</button>
+        </div>
+    </div>
+
+    <div id="recap-screen" class="screen">
+    <h1>Fim de jogo!</h1>
+    <h2 id="final-score"></h2>
+    <div id="recap-list">
+        </div>
+    <button class="solid-button" onclick="showScreen('menu-screen')">Voltar ao menu</button>
+</div>
+
+    <div id="popup" class="popup hidden">
+        <div id="popup-content">
+            <img id="popup-icon" src="" alt="" style="display:none;">
+            <p id="popup-message"></p>
+            <div id="popup-buttons">
+                </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+
+</body>
+</html>
