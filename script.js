@@ -12,19 +12,119 @@ const cards = [
         resposta: "Ada Lovelace"
     },
     {
+    tema: "Pessoa",
+    dicas: ["Foi um matemático, filósofo, inventor e engenheiro mecânico britânico.", "É frequentemente chamado de 'pai do computador'.", "Projetou a Máquina Diferencial e a Máquina Analítica.", "Seus projetos, embora não totalmente construídos em sua época, foram visionários.", "Ada Lovelace trabalhou em suas anotações e viu o potencial de sua máquina."],
+    resposta: "Charles Babbage"
+    },
+    {
+    tema: "Pessoa",
+    dicas: ["Foi um brilhante matemático britânico.", "Desempenhou um papel crucial na quebra de códigos durante a Segunda Guerra Mundial.", "Sua 'Máquina' é um conceito fundamental na ciência da computação.", "É considerado o pai da inteligência artificial.", "Sofreu perseguição por sua orientação sexual."],
+    resposta: "Alan Turing"
+    },
+    {
+    tema: "Pessoa",
+    dicas: ["Foi uma almirante da Marinha dos EUA.", "Desenvolveu o primeiro compilador para linguagem de programação.", "Popularizou a ideia de linguagens de programação baseadas em inglês.", "É famosa por ter encontrado o primeiro 'bug' real em um computador (uma mariposa).", "Uma linguagem de programação orientada a negócios tem suas iniciais no nome."],
+    resposta: "Grace Hopper"
+    },
+    {
+    tema: "Pessoa",
+    dicas: ["Co-fundou uma das maiores empresas de software do mundo.", "Sua empresa é famosa pelo sistema operacional Windows.", "Abandonou Harvard para perseguir sua paixão pela computação.", "É também um grande filantropo, junto com sua ex-esposa.", "Sua empresa dominou o mercado de software de computador pessoal por décadas."],
+    resposta: "Bill Gates"
+    },
+    {
+    tema: "Pessoa",
+    dicas: ["Co-fundou uma empresa de tecnologia famosa por seus produtos inovadores e design.", "Era conhecido por suas apresentações carismáticas de novos produtos.", "Liderou a criação do Macintosh, iPod, iPhone e iPad.", "Foi forçado a sair da própria empresa em um período e depois retornou.", "Sua visão transformou a indústria da música e dos telefones celulares."],
+    resposta: "Steve Jobs"
+    },
+    {
         tema: "Coisa",
         dicas: ["É uma rede global de computadores.", "Permite a troca de informações em todo o mundo.", "Surgiu a partir de um projeto militar nos EUA (ARPANET).", "É fundamental para a comunicação moderna.", "Você está usando ela para ler isso."],
         resposta: "Internet"
     },
+    {
+        tema: "Coisa",
+        dicas: ["É um componente eletrônico fundamental.", "Substituiu as válvulas termiônicas em muitos circuitos.", "Sua invenção em 1947 revolucionou a eletrônica.", "Permitiu a miniaturização e o aumento da eficiência dos dispositivos.", "É a base de todos os microchips modernos."],
+        resposta: "O Transistor"
+    },
+    {
+        tema: "Coisa",
+        dicas: ["É um dispositivo de entrada essencial para computadores.", "Foi desenvolvido por Douglas Engelbart nos anos 60.", "Permite a interação intuitiva com interfaces gráficas.", "Sua popularização veio com o Macintosh da Apple.", "Seu nome se assemelha a um roedor."],
+        resposta: "O Mouse"
+    },
+    {
+        tema: "Coisa",
+        dicas: ["É uma rede global de computadores interconectados.", "Surgiu de um projeto militar americano (ARPANET).", "Permite o compartilhamento de informações e comunicação em massa.", "A World Wide Web foi construída sobre ela.", "É o alicerce de praticamente toda a comunicação e informação digital atual."],
+        resposta: "A Internet"
+    },
+    {
+        tema: "Coisa",
+        dicas: ["É o 'cérebro' de um computador.", "O Intel 4004 foi um dos primeiros.", "Contém milhões de transistores em um único chip.", "É responsável por executar instruções e realizar cálculos.", "Sua evolução segue a Lei de Moore."],
+        resposta: "O Microprocessador"
+    },
+    {
+        tema: "Coisa",
+        dicas: ["É um conjunto de instruções que os computadores podem entender.", "Existem centenas delas, como Python, Java e C++.", "Permite que os humanos deem comandos aos computadores.", "Converte ideias abstratas em código executável.", "Existem de baixo e de alto nível."],
+        resposta: "A Linguagem de Programação"
+    }, 
     {
         tema: "Ano",
         dicas: ["Foi o ano de lançamento do Windows 95.", "O JavaScript foi criado neste ano.", "O eBay e a Amazon foram fundados neste ano.", "Marca um boom inicial da internet comercial.", "Lançamento da primeira versão do Java."],
         resposta: "1995"
     },
     {
+        tema: "Ano",
+        dicas: ["Foi um marco na eletrônica.", "Um componente eletrônico essencial foi inventado neste ano.", "Três cientistas da Bell Labs foram os responsáveis.", "Abriu caminho para a miniaturização de dispositivos.", "O nome do componente começa com a letra 'T'."],
+        resposta: "1947"
+    },
+    {
+        tema: "Ano",
+        dicas: ["O cérebro de muitos computadores modernos teve sua primeira versão.", "Uma empresa americana de semicondutores foi a criadora.", "Foi um grande passo para a popularização dos computadores pessoais.", "O nome deste componente tem '4004' no final.", "Antes dele, a computação era baseada em válvulas e transistores discretos."],
+        resposta: "1971"
+    },
+    {
+        tema: "Ano",
+        dicas: ["Uma gigante da tecnologia lançou seu primeiro computador pessoal de sucesso.", "Ele rodava um sistema operacional chamado DOS.", "O lançamento ajudou a padronizar a arquitetura de PCs.", "O nome do computador era composto por três letras maiúsculas.", "Seu lançamento popularizou a ideia de ter um computador em casa."],
+        resposta: "1981"
+    },
+    {
+        tema: "Ano",
+        dicas: ["Um jovem estudante finlandês criou a base de um sistema operacional.", "Ele começou como um projeto pessoal para o seu computador.", "É um exemplo famoso de software de código aberto.", "O nome é uma combinação do sobrenome do criador e 'Unix'.", "É amplamente usado em servidores e dispositivos móveis hoje."],
+        resposta: "1991"
+    },
+    {
+        tema: "Ano",
+        dicas: ["Uma empresa de tecnologia lançou um smartphone revolucionário.", "Ele tinha uma tela multitoque e dispensava teclados físicos.", "Mudou a forma como interagimos com a tecnologia móvel.", "O evento de lançamento foi apresentado por Steve Jobs.", "Abriu caminho para a era dos aplicativos móveis."],
+        resposta: "2007"
+    },
+    {
         tema: "Lugar",
         dicas: ["Região no sul da Baía de São Francisco, Califórnia.", "Abriga muitas das maiores empresas de tecnologia do mundo.", "É um centro de inovação e startups.", "Recebeu seu nome devido à grande quantidade de empresas de semicondutores.", "Empresas como Apple, Google e Facebook nasceram aqui."],
         resposta: "Vale do Silício"
+    },
+    {
+        tema: "Lugar",
+        dicas: ["É uma região na Califórnia, nos Estados Unidos.", "É o epicentro mundial da inovação tecnológica e startups.", "Empresas como Apple, Google e Meta têm suas sedes lá.", "Seu nome deriva de um elemento químico usado em semicondutores.", "Possui uma alta concentração de universidades de pesquisa e capital de risco."],
+        resposta: "Vale do Silício"
+    },
+    {
+        tema: "Lugar",
+        dicas: ["Uma propriedade rural no Reino Unido.", "Foi um centro secreto de quebra de códigos durante a Segunda Guerra Mundial.", "Alan Turing e sua equipe trabalharam intensamente aqui.", "Máquinas como a Bombe e o Colossus foram desenvolvidas e usadas neste local.", "As informações decifradas aqui foram cruciais para o esforço de guerra aliado."],
+        resposta: "Bletchley Park"
+    },
+    {
+        tema: "Lugar",
+        dicas: ["Uma cidade no Vale do Silício, Califórnia.", "É o lar da Universidade de Stanford.", "Empresas como Hewlett-Packard (HP) e Tesla foram fundadas aqui.", "É um centro de pesquisa e desenvolvimento de alta tecnologia.", "Considerado por muitos como o berço da inovação tecnológica."],
+        resposta: "Palo Alto"
+    },
+    {
+        tema: "Lugar",
+        dicas: ["Uma cidade em Massachusetts, perto de Boston.", "Abriga duas das universidades mais prestigiadas do mundo: MIT e Harvard.", "Teve um papel fundamental no desenvolvimento da ARPANET.", "É um importante polo de pesquisa em inteligência artificial e biotecnologia.", "Muitos laureados com o Prêmio Nobel em ciências da computação vêm de suas instituições."],
+        resposta: "Cambridge, Massachusetts"
+    },
+    {
+        tema: "Lugar",
+        dicas: ["Uma grande cidade no sul da Índia.", "Conhecida como o 'Vale do Silício da Índia'.", "É um centro global de tecnologia da informação e serviços de software.", "Possui um grande número de empresas de TI multinacionais e startups.", "Atrai talentos em engenharia de software de todo o país."],
+        resposta: "Bangalore"
     },
     {
         tema: "Coisa",
