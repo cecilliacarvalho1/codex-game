@@ -4,8 +4,11 @@ let score = 0;
 let currentCardIndex = 0;
 let revealedTipsCount = 0;
 let revealedTipsForCurrentCard = [];
+const maxCardsPerGame = 10;
+let shuffledCardsForCurrentGame = [];
 
-const cards = [
+// Array de cartas padrão
+const defaultCards = [
     {
         tema: "Pessoa",
         dicas: ["É considerada a primeira programadora da história.", "Trabalhou nas anotações sobre a Máquina Analítica de Charles Babbage.", "Filha do poeta Lord Byron.", "Suas anotações são cruciais para a história da computação.", "Um idioma de programação foi nomeado em sua homenagem."],
@@ -44,28 +47,23 @@ const cards = [
     {
         tema: "Coisa",
         dicas: ["É um componente eletrônico fundamental.", "Substituiu as válvulas termiônicas em muitos circuitos.", "Sua invenção em 1947 revolucionou a eletrônica.", "Permitiu a miniaturização e o aumento da eficiência dos dispositivos.", "É a base de todos os microchips modernos."],
-        resposta: "O Transistor"
+        resposta: "Transistor"
     },
     {
         tema: "Coisa",
         dicas: ["É um dispositivo de entrada essencial para computadores.", "Foi desenvolvido por Douglas Engelbart nos anos 60.", "Permite a interação intuitiva com interfaces gráficas.", "Sua popularização veio com o Macintosh da Apple.", "Seu nome se assemelha a um roedor."],
-        resposta: "O Mouse"
-    },
-    {
-        tema: "Coisa",
-        dicas: ["É uma rede global de computadores interconectados.", "Surgiu de um projeto militar americano (ARPANET).", "Permite o compartilhamento de informações e comunicação em massa.", "A World Wide Web foi construída sobre ela.", "É o alicerce de praticamente toda a comunicação e informação digital atual."],
-        resposta: "A Internet"
+        resposta: "Mouse"
     },
     {
         tema: "Coisa",
         dicas: ["É o 'cérebro' de um computador.", "O Intel 4004 foi um dos primeiros.", "Contém milhões de transistores em um único chip.", "É responsável por executar instruções e realizar cálculos.", "Sua evolução segue a Lei de Moore."],
-        resposta: "O Microprocessador"
+        resposta: "Microprocessador"
     },
     {
         tema: "Coisa",
         dicas: ["É um conjunto de instruções que os computadores podem entender.", "Existem centenas delas, como Python, Java e C++.", "Permite que os humanos deem comandos aos computadores.", "Converte ideias abstratas em código executável.", "Existem de baixo e de alto nível."],
-        resposta: "A Linguagem de Programação"
-    }, 
+        resposta: "Linguagem de Programação"
+    },
     {
         tema: "Ano",
         dicas: ["Foi o ano de lançamento do Windows 95.", "O JavaScript foi criado neste ano.", "O eBay e a Amazon foram fundados neste ano.", "Marca um boom inicial da internet comercial.", "Lançamento da primeira versão do Java."],
@@ -103,11 +101,6 @@ const cards = [
     },
     {
         tema: "Lugar",
-        dicas: ["É uma região na Califórnia, nos Estados Unidos.", "É o epicentro mundial da inovação tecnológica e startups.", "Empresas como Apple, Google e Meta têm suas sedes lá.", "Seu nome deriva de um elemento químico usado em semicondutores.", "Possui uma alta concentração de universidades de pesquisa e capital de risco."],
-        resposta: "Vale do Silício"
-    },
-    {
-        tema: "Lugar",
         dicas: ["Uma propriedade rural no Reino Unido.", "Foi um centro secreto de quebra de códigos durante a Segunda Guerra Mundial.", "Alan Turing e sua equipe trabalharam intensamente aqui.", "Máquinas como a Bombe e o Colossus foram desenvolvidas e usadas neste local.", "As informações decifradas aqui foram cruciais para o esforço de guerra aliado."],
         resposta: "Bletchley Park"
     },
@@ -119,7 +112,7 @@ const cards = [
     {
         tema: "Lugar",
         dicas: ["Uma cidade em Massachusetts, perto de Boston.", "Abriga duas das universidades mais prestigiadas do mundo: MIT e Harvard.", "Teve um papel fundamental no desenvolvimento da ARPANET.", "É um importante polo de pesquisa em inteligência artificial e biotecnologia.", "Muitos laureados com o Prêmio Nobel em ciências da computação vêm de suas instituições."],
-        resposta: "Cambridge, Massachusetts"
+        resposta: "Cambridge"
     },
     {
         tema: "Lugar",
@@ -130,19 +123,19 @@ const cards = [
         tema: "Coisa",
         dicas: ["Campo da ciência da computação que se dedica a criar máquinas que simulam o raciocínio humano.", "Inclui áreas como aprendizado de máquina e redes neurais.", "Alimentado por grandes volumes de dados (Big Data).", "Está presente em assistentes virtuais e recomendações de streaming."],
         resposta: "Inteligência Artificial"
-    },
-    {
-        tema: "Pessoa",
-        dicas: ["Cofundador de uma das maiores empresas de software do mundo.", "Conhecido por sua filantropia e esforços em saúde global.", "Esteve à frente da 'revolução do computador pessoal'.", "Fundou a Microsoft.", "Um dos homens mais ricos do mundo."],
-        resposta: "Bill Gates"
     }
 ];
+
+let customCards = []; // Array para cartas personalizadas
+let allAvailableCards = []; // Array que combinará cartas padrão e personalizadas
 
 let history = [];
 
 // Exibe a tela inicial
 document.addEventListener('DOMContentLoaded', () => {
-    showScreen('menu-screen');
+    loadCustomCards(); // Carrega as cartas personalizadas ao iniciar
+    updateAllAvailableCards(); // Combina as cartas padrão e personalizadas
+    showScreen('menu-screen'); // Garante que apenas a tela do menu seja mostrada ao carregar
 
     const playerNameInput = document.getElementById('player-name');
     if (playerNameInput) {
@@ -153,22 +146,31 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // NOVO: Event listener para o campo de resposta na tela do jogo
     const answerInput = document.getElementById('answer-input');
     if (answerInput) {
         answerInput.addEventListener('keypress', function(event) {
-            // Verifica se a tecla pressionada é "Enter" (código 13 ou "key" "Enter")
             if (event.key === 'Enter' || event.keyCode === 13) {
-                checkAnswer(); // Chama a função que verifica a resposta
+                checkAnswer();
             }
         });
     }
 });
 
 function showScreen(screenId) {
-    document.getElementById(currentScreen).classList.remove('active');
-    document.getElementById(screenId).classList.add('active');
-    currentScreen = screenId;
+    // 1. Remove a classe 'active' da tela atualmente visível
+    const activeScreen = document.getElementById(currentScreen);
+    if (activeScreen) {
+        activeScreen.classList.remove('active');
+    }
+
+    // 2. Adiciona a classe 'active' à nova tela
+    const newActiveScreen = document.getElementById(screenId);
+    if (newActiveScreen) {
+        newActiveScreen.classList.add('active');
+        currentScreen = screenId; // Atualiza qual é a tela "atual"
+    } else {
+        console.error("Erro: Tela com ID '" + screenId + "' não encontrada.");
+    }
 }
 
 function startGame() {
@@ -180,18 +182,102 @@ function startGame() {
     score = 0;
     currentCardIndex = 0;
     history = [];
-    shuffleCards();
+    shuffleAndSelectCards();
+    // Verifica se há cartas para jogar depois de tentar embaralhar
+    if (shuffledCardsForCurrentGame.length === 0) {
+        // showPopup já foi chamado dentro de shuffleAndSelectCards se não houver cartas
+        return; // Retorna para não continuar o jogo sem cartas
+    }
     showNextCard();
     showScreen('game-screen');
     updateHeader();
 }
 
-function shuffleCards() {
-    for (let i = cards.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [cards[i], cards[j]] = [cards[j], cards[i]];
+// Função para carregar cartas personalizadas do localStorage
+function loadCustomCards() {
+    const storedCards = localStorage.getItem('customCodexCards');
+    if (storedCards) {
+        customCards = JSON.parse(storedCards);
     }
 }
+
+// Função para salvar cartas personalizadas no localStorage
+function saveCustomCards() {
+    localStorage.setItem('customCodexCards', JSON.stringify(customCards));
+}
+
+// Função para combinar cartas padrão e personalizadas (mantida, mas o principal controle está em shuffleAndSelectCards)
+function updateAllAvailableCards() {
+    allAvailableCards = [...defaultCards, ...customCards]; // Aqui apenas combina para referência geral
+}
+
+function shuffleAndSelectCards() {
+    updateAllAvailableCards(); // Garante que allAvailableCards está atualizado
+    
+    // Verifica se há cartas para jogar no total
+    if (allAvailableCards.length === 0) {
+        showPopup("Não há cartas disponíveis para jogar! Adicione algumas cartas ou recarregue para usar as padrão.", "error.png", [
+            { text: "OK", className: "popup-ok", callback: () => showScreen('menu-screen') }
+        ]);
+        shuffledCardsForCurrentGame = []; // Garante que o array esteja vazio
+        return;
+    }
+
+    let cardsToPlay = [];
+
+    // 1. Adiciona todas as cartas personalizadas primeiro
+    // Faz uma cópia para não modificar o array original customCards
+    cardsToPlay = [...customCards]; 
+
+    // 2. Se ainda precisar de mais cartas para atingir maxCardsPerGame, preenche com cartas padrão
+    if (cardsToPlay.length < maxCardsPerGame) {
+        // Filtra as cartas padrão para não incluir as que já são personalizadas (se houver alguma sobreposição)
+        const remainingDefaultCards = defaultCards.filter(defaultCard => 
+            !cardsToPlay.some(customCard => 
+                customCard.tema === defaultCard.tema && 
+                customCard.resposta.toLowerCase() === defaultCard.resposta.toLowerCase()
+            )
+        );
+
+        // Embaralha as cartas padrão restantes para que a seleção seja aleatória
+        const shuffledDefaultCards = [...remainingDefaultCards];
+        for (let i = shuffledDefaultCards.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [shuffledDefaultCards[i], shuffledDefaultCards[j]] = [shuffledDefaultCards[j], shuffledDefaultCards[i]];
+        }
+
+        // Adiciona cartas padrão até atingir maxCardsPerGame ou esgotar as padrão
+        const neededCards = maxCardsPerGame - cardsToPlay.length;
+        cardsToPlay = cardsToPlay.concat(shuffledDefaultCards.slice(0, neededCards));
+    }
+
+    // 3. Embaralha a seleção final de cartas para a rodada
+    // Isso garante que as cartas personalizadas não apareçam sempre na mesma ordem
+    for (let i = cardsToPlay.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [cardsToPlay[i], cardsToPlay[j]] = [cardsToPlay[j], cardsToPlay[i]];
+    }
+    
+    shuffledCardsForCurrentGame = cardsToPlay;
+
+    // Última verificação caso, por algum motivo, não tenha sido possível montar uma rodada
+    if (shuffledCardsForCurrentGame.length === 0 && allAvailableCards.length > 0) {
+        // Isso pode acontecer se, por exemplo, maxCardsPerGame for muito alto e as cartas disponíveis não bastarem
+        // Neste caso, se houver cartas disponíveis (allAvailableCards > 0), jogue com todas elas
+        shuffledCardsForCurrentGame = [...allAvailableCards];
+        // Opcional: Embaralhar allAvailableCards se for usar todas
+        for (let i = shuffledCardsForCurrentGame.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [shuffledCardsForCurrentGame[i], shuffledCardsForCurrentGame[j]] = [shuffledCardsForCurrentGame[j], shuffledCardsForCurrentGame[i]];
+        }
+    } else if (shuffledCardsForCurrentGame.length === 0) {
+         // Se nem mesmo allAvailableCards tem cartas, então realmente não há o que jogar
+        showPopup("Não há cartas suficientes para jogar. Por favor, adicione mais cartas ou verifique as configurações.", "error.png", [
+            { text: "OK", className: "popup-ok", callback: () => showScreen('menu-screen') }
+        ]);
+    }
+}
+
 
 function updateHeader() {
     document.getElementById('player-display').textContent = "Jogador: " + playerName;
@@ -199,7 +285,8 @@ function updateHeader() {
 }
 
 function showNextCard() {
-    if (currentCardIndex >= cards.length) {
+    // Adicionei uma verificação para garantir que shuffledCardsForCurrentGame não esteja vazio
+    if (!shuffledCardsForCurrentGame || shuffledCardsForCurrentGame.length === 0 || currentCardIndex >= shuffledCardsForCurrentGame.length) {
         finishGame();
         return;
     }
@@ -207,7 +294,7 @@ function showNextCard() {
     revealedTipsCount = 0;
     revealedTipsForCurrentCard = [];
 
-    const card = cards[currentCardIndex];
+    const card = shuffledCardsForCurrentGame[currentCardIndex];
     document.getElementById('theme-label').textContent = "Categoria: " + card.tema;
 
     const dicasArea = document.getElementById('dicas-area');
@@ -226,7 +313,7 @@ function showNextCard() {
 }
 
 function revealTip(index, buttonElement) {
-    const card = cards[currentCardIndex];
+    const card = shuffledCardsForCurrentGame[currentCardIndex];
     const dicasArea = document.getElementById('dicas-area');
 
     if (revealedTipsCount === 0) {
@@ -244,7 +331,7 @@ function revealTip(index, buttonElement) {
 function checkAnswer() {
     const answerInput = document.getElementById('answer-input');
     const userAnswer = answerInput.value.trim().toLowerCase();
-    const correctAnswer = cards[currentCardIndex].resposta.toLowerCase();
+    const correctAnswer = shuffledCardsForCurrentGame[currentCardIndex].resposta.toLowerCase();
 
     if (userAnswer === '') {
         showPopup("Por favor, digite sua resposta.");
@@ -254,7 +341,7 @@ function checkAnswer() {
     if (userAnswer === correctAnswer) {
         const points = 6 - revealedTipsCount;
         score += Math.max(points, 1);
-        history.push({ carta: cards[currentCardIndex], resposta: userAnswer, pontos: Math.max(points, 1), acertou: true });
+        history.push({ carta: shuffledCardsForCurrentGame[currentCardIndex], resposta: userAnswer, pontos: Math.max(points, 1), acertou: true });
         showPopup("Resposta correta! +" + Math.max(points, 1) + " pontos", "success.png", [
             { text: "OK", className: "popup-ok", callback: () => {
                 currentCardIndex++;
@@ -263,7 +350,7 @@ function checkAnswer() {
             }}
         ]);
     } else {
-        history.push({ carta: cards[currentCardIndex], resposta: userAnswer, pontos: 0, acertou: false });
+        history.push({ carta: shuffledCardsForCurrentGame[currentCardIndex], resposta: userAnswer, pontos: 0, acertou: false });
         showPopup("Resposta incorreta!", "error.png", [
             { text: "OK", className: "popup-ok", callback: () => {} }
         ]);
@@ -272,7 +359,7 @@ function checkAnswer() {
 }
 
 function skipCard() {
-    history.push({ carta: cards[currentCardIndex], resposta: "Pulou", pontos: 0, acertou: false });
+    history.push({ carta: shuffledCardsForCurrentGame[currentCardIndex], resposta: "Pulou", pontos: 0, acertou: false });
     showPopup("Carta pulada.", "info.png", [
         { text: "OK", className: "popup-ok", callback: () => {
             currentCardIndex++;
@@ -283,8 +370,8 @@ function skipCard() {
 }
 
 function showCorrectAnswer() {
-    const correctAnswer = cards[currentCardIndex].resposta;
-    history.push({ carta: cards[currentCardIndex], resposta: "Desistiu", pontos: 0, acertou: false });
+    const correctAnswer = shuffledCardsForCurrentGame[currentCardIndex].resposta;
+    history.push({ carta: shuffledCardsForCurrentGame[currentCardIndex], resposta: "Desistiu", pontos: 0, acertou: false });
     showPopup("A resposta era: " + correctAnswer, "info.png", [
         { text: "OK", className: "popup-ok", callback: () => {
             currentCardIndex++;
@@ -309,10 +396,8 @@ function finishGame() {
     history.forEach((item, index) => {
         const status = item.acertou ? 'Correta' : item.resposta === 'Pulou' ? 'Pulada' : item.resposta === 'Desistiu' ? 'Desistiu' : 'Incorreta';
 
-        // Pega a resposta do item do histórico (que é a última tentativa para aquela carta)
         const respostaDoJogador = item.resposta;
 
-        // Construir a lista de dicas
         let dicasHtml = '<ul>';
         item.carta.dicas.forEach((dica, dicaIndex) => {
             dicasHtml += `<li>Dica ${dicaIndex + 1}: ${dica}</li>`;
@@ -356,4 +441,46 @@ function showPopup(message, icon = null, buttons = [{ text: "OK", className: "po
     });
 
     popup.classList.remove('hidden');
+}
+
+// NOVO: Função para adicionar uma nova carta
+function addNewCard() {
+    const theme = document.getElementById('new-card-theme').value;
+    const answer = document.getElementById('new-card-answer').value.trim();
+    const tips = [];
+
+    // Coleta as dicas, ignorando campos vazios
+    for (let i = 1; i <= 5; i++) {
+        const tipInput = document.getElementById(`new-card-tip${i}`).value.trim();
+        if (tipInput !== '') {
+            tips.push(tipInput);
+        }
+    }
+
+    if (answer === '' || tips.length < 2) { // Exige pelo menos 2 dicas e uma resposta
+        showPopup("Por favor, preencha o tema, a resposta e pelo menos 2 dicas para a nova carta.");
+        return;
+    }
+
+    const newCard = {
+        tema: theme,
+        dicas: tips,
+        resposta: answer
+    };
+
+    customCards.push(newCard);
+    saveCustomCards(); // Salva as cartas no localStorage
+    updateAllAvailableCards(); // Atualiza a lista de cartas disponíveis
+
+    showPopup("Carta adicionada com sucesso!", "success.png", [
+        { text: "OK", className: "popup-ok", callback: () => {
+            // Limpa os campos após adicionar a carta
+            document.getElementById('new-card-theme').value = 'Pessoa';
+            document.getElementById('new-card-answer').value = '';
+            for (let i = 1; i <= 5; i++) {
+                document.getElementById(`new-card-tip${i}`).value = '';
+            }
+            showScreen('menu-screen'); // Volta para o menu
+        }}
+    ]);
 }
