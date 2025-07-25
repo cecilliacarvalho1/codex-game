@@ -5,14 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Codex</title>
     <link rel="stylesheet" href="style.css">
-</head>
+    </head>
 <body>
 
     <div id="menu-screen" class="screen active">
         <img src="logo.png" alt="Logo" class="logo">
         <button class="solid-button" onclick="showScreen('player-config-screen')">Jogar</button>
         <button class="solid-button" onclick="showScreen('instructions-screen')">Instruções</button>
-        <button class="solid-button" onclick="showScreen('create-card-screen')">Criar Cartas</button>
+        <button class="solid-button" onclick="showScreen('custom-cards-screen')">Cartas Personalizadas</button>
     </div>
 
     <div id="instructions-screen" class="screen">
@@ -23,21 +23,24 @@
             Os temas são: <strong>Ano, Coisa, Pessoa</strong> ou <strong>Lugar</strong>.<br><br>
             <strong>Pontuação:</strong><br>
             1ª Dica: +5 Pontos<br>
-            2ª Dica: +4 Pontos<br>            
+            2ª Dica: +4 Pontos<br>
             3ª Dica: +3 Pontos<br>
             4ª Dica: +2 Pontos<br>
-            5ª Dica: +1 Ponto<br><br>
-            Obs: Você pode criar cartas personalizadas para a sua rodada de Codex.
+            5ª Dica: +1 Ponto
         </p>
         <button class="solid-button" onclick="showScreen('menu-screen')">Voltar ao menu</button>
     </div>
 
     <div id="player-config-screen" class="screen">
         <img src="logo_azul.png" alt="Logo Azul" class="logo">
-        <label for="player-name">Digite seu nome:</label>
-        <input type="text" id="player-name" placeholder="Seu nome aqui">
-        <button class="hollow-button" onclick="startGame()">Começar Jogo</button>
-        <button class="hollow-button" onclick="showScreen('menu-screen')">Voltar ao menu</button>
+        <div class="screen-content-area">
+            <label for="player-name">Digite seu nome:</label>
+            <input type="text" id="player-name" placeholder="Seu nome aqui">
+            <div class="button-group">
+                <button class="hollow-button" onclick="startGame()">Começar Jogo</button>
+                <button class="hollow-button" onclick="showScreen('menu-screen')">Voltar ao menu</button>
+            </div>
+        </div>
     </div>
 
     <div id="game-screen" class="screen">
@@ -79,33 +82,42 @@
     <button class="solid-button" onclick="showScreen('menu-screen')">Voltar ao menu</button>
 </div>
 
-    <div id="create-card-screen" class="screen">
-        
-        <label for="new-card-theme">Tema da Carta:</label>
-        <select id="new-card-theme">
-            <option value="Pessoa">Pessoa</option>
-            <option value="Coisa">Coisa</option>
-            <option value="Ano">Ano</option>
-            <option value="Lugar">Lugar</option>
-        </select>
+    <div id="custom-cards-screen" class="screen">
+        <h1>Gerenciar Cartas Personalizadas</h1>
+        <div class="screen-content-area">
+            <h2>Suas Cartas Atuais:</h2>
+            <div id="custom-cards-list">
+                <p>Nenhuma carta personalizada ainda. Crie uma abaixo!</p>
+            </div>
 
-        <label for="new-card-tip1">Dica 1:</label>
-        <input type="text" id="new-card-tip1" placeholder="Primeira dica">
-        <label for="new-card-tip2">Dica 2:</label>
-        <input type="text" id="new-card-tip2" placeholder="Segunda dica">
-        <label for="new-card-tip3">Dica 3:</label>
-        <input type="text" id="new-card-tip3" placeholder="Terceira dica (opcional)">
-        <label for="new-card-tip4">Dica 4:</label>
-        <input type="text" id="new-card-tip4" placeholder="Quarta dica (opcional)">
-        <label for="new-card-tip5">Dica 5:</label>
-        <input type="text" id="new-card-tip5" placeholder="Quinta dica (opcional)">
+            <hr class="separator"> 
+            <h2>Criar Nova Carta:</h2>
+            <label for="new-card-theme">Tema da Carta:</label>
+            <select id="new-card-theme">
+                <option value="Pessoa">Pessoa</option>
+                <option value="Coisa">Coisa</option>
+                <option value="Ano">Ano</option>
+                <option value="Lugar">Lugar</option>
+            </select>
 
-        <label for="new-card-answer">Resposta Correta:</label>
-        <input type="text" id="new-card-answer" placeholder="Resposta">
+            <label for="new-card-tip1">Dica 1:</label>
+            <input type="text" id="new-card-tip1" placeholder="Primeira dica">
+            <label for="new-card-tip2">Dica 2:</label>
+            <input type="text" id="new-card-tip2" placeholder="Segunda dica">
+            <label for="new-card-tip3">Dica 3:</label>
+            <input type="text" id="new-card-tip3" placeholder="Terceira dica (opcional)">
+            <label for="new-card-tip4">Dica 4:</label>
+            <input type="text" id="new-card-tip4" placeholder="Quarta dica (opcional)">
+            <label for="new-card-tip5">Dica 5:</label>
+            <input type="text" id="new-card-tip5" placeholder="Quinta dica (opcional)">
 
-        <div class="button-group">
-            <button class="solid-button" onclick="addNewCard()">Adicionar Carta</button>
-            <button class="solid-button" onclick="showScreen('menu-screen')">Voltar ao Menu</button>
+            <label for="new-card-answer">Resposta Correta:</label>
+            <input type="text" id="new-card-answer" placeholder="Resposta">
+
+            <div class="button-group">
+                <button class="solid-button" onclick="addNewCard()">Adicionar Carta</button>
+                <button class="solid-button" onclick="showScreen('menu-screen')">Voltar ao Menu</button>
+            </div>
         </div>
     </div>
 

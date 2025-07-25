@@ -4,10 +4,13 @@ let score = 0;
 let currentCardIndex = 0;
 let revealedTipsCount = 0;
 let revealedTipsForCurrentCard = [];
-const maxCardsPerGame = 10;
+const maxCardsPerGame = 10; // Máximo de cartas na rodada (para o modo solo)
+
 let shuffledCardsForCurrentGame = [];
 
-// Array de cartas padrão
+// Removidas: Variáveis relacionadas ao modo multiplayer (hostedGameCards, currentRoomCode, BASE_URL_FOR_QR, minCardsForHostedGame)
+
+// Array de cartas padrão (mantido o mesmo)
 const defaultCards = [
     {
         tema: "Pessoa",
@@ -126,17 +129,22 @@ const defaultCards = [
     }
 ];
 
-let customCards = []; // Array para cartas personalizadas
-let allAvailableCards = []; // Array que combinará cartas padrão e personalizadas
+let customCards = []; // Array para cartas personalizadas (persistente via localStorage)
+let allAvailableCards = []; // Array que combinará cartas padrão e personalizadas (para o modo solo)
 
 let history = [];
 
-// Exibe a tela inicial
+// =========================================================
+// Inicialização e Event Listeners
+// =========================================================
 document.addEventListener('DOMContentLoaded', () => {
     loadCustomCards(); // Carrega as cartas personalizadas ao iniciar
     updateAllAvailableCards(); // Combina as cartas padrão e personalizadas
-    showScreen('menu-screen'); // Garante que apenas a tela do menu seja mostrada ao carregar
 
+    // Removida: Lógica de verificar código de sala na URL
+    showScreen('menu-screen'); // Sempre começa pelo menu
+
+    // Event listener para o campo de nome do jogador solo
     const playerNameInput = document.getElementById('player-name');
     if (playerNameInput) {
         playerNameInput.addEventListener('keypress', function(event) {
@@ -146,6 +154,9 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // Removido: Event listener para o campo de nome do jogador em sala (join)
+
+    // Event listener para o campo de resposta na tela do jogo
     const answerInput = document.getElementById('answer-input');
     if (answerInput) {
         answerInput.addEventListener('keypress', function(event) {
@@ -154,26 +165,35 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
+    // Removido: Inicialização do contador de cartas do host
 });
 
+// Funções de controle de tela
 function showScreen(screenId) {
-    // 1. Remove a classe 'active' da tela atualmente visível
     const activeScreen = document.getElementById(currentScreen);
     if (activeScreen) {
         activeScreen.classList.remove('active');
     }
 
-    // 2. Adiciona a classe 'active' à nova tela
     const newActiveScreen = document.getElementById(screenId);
     if (newActiveScreen) {
         newActiveScreen.classList.add('active');
-        currentScreen = screenId; // Atualiza qual é a tela "atual"
+        currentScreen = screenId;
+
+        // Renderiza a lista de cartas personalizadas ao entrar na tela
+        if (screenId === 'custom-cards-screen') {
+            renderCustomCardsList();
+        }
     } else {
         console.error("Erro: Tela com ID '" + screenId + "' não encontrada.");
     }
 }
 
-function startGame() {
+// =========================================================
+// Lógica do Modo Solo
+// =========================================================
+
+function startGame() { // Esta é a função para 'Jogar Solo'
     playerName = document.getElementById('player-name').value.trim();
     if (playerName === '') {
         showPopup("Por favor, digite seu nome.");
@@ -182,102 +202,53 @@ function startGame() {
     score = 0;
     currentCardIndex = 0;
     history = [];
-    shuffleAndSelectCards();
-    // Verifica se há cartas para jogar depois de tentar embaralhar
+
+    // Para o modo solo, embaralhamos e selecionamos das cartas padrão + personalizadas salvas
+    shuffleAndSelectSoloCards();
+
     if (shuffledCardsForCurrentGame.length === 0) {
-        // showPopup já foi chamado dentro de shuffleAndSelectCards se não houver cartas
-        return; // Retorna para não continuar o jogo sem cartas
+        return; // showPopup já foi chamado dentro de shuffleAndSelectSoloCards
     }
     showNextCard();
     showScreen('game-screen');
     updateHeader();
 }
 
-// Função para carregar cartas personalizadas do localStorage
-function loadCustomCards() {
-    const storedCards = localStorage.getItem('customCodexCards');
-    if (storedCards) {
-        customCards = JSON.parse(storedCards);
-    }
-}
+function shuffleAndSelectSoloCards() {
+    updateAllAvailableCards(); // Atualiza allAvailableCards combinando default e custom
 
-// Função para salvar cartas personalizadas no localStorage
-function saveCustomCards() {
-    localStorage.setItem('customCodexCards', JSON.stringify(customCards));
-}
-
-// Função para combinar cartas padrão e personalizadas (mantida, mas o principal controle está em shuffleAndSelectCards)
-function updateAllAvailableCards() {
-    allAvailableCards = [...defaultCards, ...customCards]; // Aqui apenas combina para referência geral
-}
-
-function shuffleAndSelectCards() {
-    updateAllAvailableCards(); // Garante que allAvailableCards está atualizado
-    
-    // Verifica se há cartas para jogar no total
     if (allAvailableCards.length === 0) {
-        showPopup("Não há cartas disponíveis para jogar! Adicione algumas cartas ou recarregue para usar as padrão.", "error.png", [
+        showPopup("Não há cartas disponíveis para jogar solo! Adicione algumas cartas ou recarregue para usar as padrão.", "error.png", [
             { text: "OK", className: "popup-ok", callback: () => showScreen('menu-screen') }
         ]);
-        shuffledCardsForCurrentGame = []; // Garante que o array esteja vazio
+        shuffledCardsForCurrentGame = [];
         return;
     }
 
-    let cardsToPlay = [];
-
-    // 1. Adiciona todas as cartas personalizadas primeiro
-    // Faz uma cópia para não modificar o array original customCards
-    cardsToPlay = [...customCards]; 
-
-    // 2. Se ainda precisar de mais cartas para atingir maxCardsPerGame, preenche com cartas padrão
-    if (cardsToPlay.length < maxCardsPerGame) {
-        // Filtra as cartas padrão para não incluir as que já são personalizadas (se houver alguma sobreposição)
-        const remainingDefaultCards = defaultCards.filter(defaultCard => 
-            !cardsToPlay.some(customCard => 
-                customCard.tema === defaultCard.tema && 
-                customCard.resposta.toLowerCase() === defaultCard.resposta.toLowerCase()
-            )
-        );
-
-        // Embaralha as cartas padrão restantes para que a seleção seja aleatória
-        const shuffledDefaultCards = [...remainingDefaultCards];
-        for (let i = shuffledDefaultCards.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            [shuffledDefaultCards[i], shuffledDefaultCards[j]] = [shuffledDefaultCards[j], shuffledDefaultCards[i]];
-        }
-
-        // Adiciona cartas padrão até atingir maxCardsPerGame ou esgotar as padrão
-        const neededCards = maxCardsPerGame - cardsToPlay.length;
-        cardsToPlay = cardsToPlay.concat(shuffledDefaultCards.slice(0, neededCards));
-    }
-
-    // 3. Embaralha a seleção final de cartas para a rodada
-    // Isso garante que as cartas personalizadas não apareçam sempre na mesma ordem
-    for (let i = cardsToPlay.length - 1; i > 0; i--) {
+    const shuffledAllCards = [...allAvailableCards];
+    for (let i = shuffledAllCards.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
-        [cardsToPlay[i], cardsToPlay[j]] = [cardsToPlay[j], cardsToPlay[i]];
+        [shuffledAllCards[i], shuffledAllCards[j]] = [shuffledAllCards[j], shuffledAllCards[i]];
     }
-    
-    shuffledCardsForCurrentGame = cardsToPlay;
 
-    // Última verificação caso, por algum motivo, não tenha sido possível montar uma rodada
-    if (shuffledCardsForCurrentGame.length === 0 && allAvailableCards.length > 0) {
-        // Isso pode acontecer se, por exemplo, maxCardsPerGame for muito alto e as cartas disponíveis não bastarem
-        // Neste caso, se houver cartas disponíveis (allAvailableCards > 0), jogue com todas elas
-        shuffledCardsForCurrentGame = [...allAvailableCards];
-        // Opcional: Embaralhar allAvailableCards se for usar todas
-        for (let i = shuffledCardsForCurrentGame.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            [shuffledCardsForCurrentGame[i], shuffledCardsForCurrentGame[j]] = [shuffledCardsForCurrentGame[j], shuffledCardsForCurrentGame[i]];
-        }
-    } else if (shuffledCardsForCurrentGame.length === 0) {
-         // Se nem mesmo allAvailableCards tem cartas, então realmente não há o que jogar
-        showPopup("Não há cartas suficientes para jogar. Por favor, adicione mais cartas ou verifique as configurações.", "error.png", [
-            { text: "OK", className: "popup-ok", callback: () => showScreen('menu-screen') }
-        ]);
-    }
+    shuffledCardsForCurrentGame = shuffledAllCards.slice(0, Math.min(maxCardsPerGame, shuffledAllCards.length));
 }
 
+// =========================================================
+// Removidas: Lógica do Modo Multiplayer (Funções relacionadas a sala, host, convidados, QR Code)
+// =========================================================
+// showPlayWithFriendsOptions() - REMOVIDA
+// addHostCard() - REMOVIDA
+// updateHostCardCount() - REMOVIDA
+// updateHostCardListSummary() - REMOVIDA
+// generateRoomCode() - REMOVIDA
+// startHostedGame() - REMOVIDA
+// attemptJoinGame() - REMOVIDA
+
+
+// =========================================================
+// Funções Gerais do Jogo (mantidas)
+// =========================================================
 
 function updateHeader() {
     document.getElementById('player-display').textContent = "Jogador: " + playerName;
@@ -285,7 +256,6 @@ function updateHeader() {
 }
 
 function showNextCard() {
-    // Adicionei uma verificação para garantir que shuffledCardsForCurrentGame não esteja vazio
     if (!shuffledCardsForCurrentGame || shuffledCardsForCurrentGame.length === 0 || currentCardIndex >= shuffledCardsForCurrentGame.length) {
         finishGame();
         return;
@@ -443,13 +413,31 @@ function showPopup(message, icon = null, buttons = [{ text: "OK", className: "po
     popup.classList.remove('hidden');
 }
 
-// NOVO: Função para adicionar uma nova carta
-function addNewCard() {
+// =========================================================
+// Funções de Cartas Personalizadas (via LocalStorage)
+// =========================================================
+
+function loadCustomCards() {
+    const storedCards = localStorage.getItem('customCodexCards');
+    if (storedCards) {
+        customCards = JSON.parse(storedCards);
+    }
+}
+
+function saveCustomCards() {
+    localStorage.setItem('customCodexCards', JSON.stringify(customCards));
+}
+
+function updateAllAvailableCards() {
+    // As cartas personalizadas agora virão antes das cartas padrão
+    allAvailableCards = [...customCards, ...defaultCards];
+}
+
+function addNewCard() { // Para adicionar cartas ao pool padrão (localStorage)
     const theme = document.getElementById('new-card-theme').value;
     const answer = document.getElementById('new-card-answer').value.trim();
     const tips = [];
 
-    // Coleta as dicas, ignorando campos vazios
     for (let i = 1; i <= 5; i++) {
         const tipInput = document.getElementById(`new-card-tip${i}`).value.trim();
         if (tipInput !== '') {
@@ -457,7 +445,7 @@ function addNewCard() {
         }
     }
 
-    if (answer === '' || tips.length < 2) { // Exige pelo menos 2 dicas e uma resposta
+    if (answer === '' || tips.length < 2) {
         showPopup("Por favor, preencha o tema, a resposta e pelo menos 2 dicas para a nova carta.");
         return;
     }
@@ -469,10 +457,10 @@ function addNewCard() {
     };
 
     customCards.push(newCard);
-    saveCustomCards(); // Salva as cartas no localStorage
-    updateAllAvailableCards(); // Atualiza a lista de cartas disponíveis
+    saveCustomCards();
+    updateAllAvailableCards(); // Atualiza a lista de cartas disponíveis para o modo solo
 
-    showPopup("Carta adicionada com sucesso!", "success.png", [
+    showPopup("Carta adicionada com sucesso ao seu acervo!", "success.png", [
         { text: "OK", className: "popup-ok", callback: () => {
             // Limpa os campos após adicionar a carta
             document.getElementById('new-card-theme').value = 'Pessoa';
@@ -480,7 +468,55 @@ function addNewCard() {
             for (let i = 1; i <= 5; i++) {
                 document.getElementById(`new-card-tip${i}`).value = '';
             }
-            showScreen('menu-screen'); // Volta para o menu
+            renderCustomCardsList(); // Atualiza a lista de cartas exibidas
         }}
     ]);
+}
+
+// Função para renderizar a lista de cartas personalizadas
+function renderCustomCardsList() {
+    const customCardsListDiv = document.getElementById('custom-cards-list');
+    customCardsListDiv.innerHTML = ''; // Limpa a lista existente
+
+    if (customCards.length === 0) {
+        customCardsListDiv.innerHTML = '<p>Nenhuma carta personalizada ainda. Crie uma abaixo!</p>';
+        return;
+    }
+
+    customCards.forEach((card, index) => {
+        const cardItem = document.createElement('div');
+        cardItem.classList.add('custom-card-item');
+
+        const cardInfo = document.createElement('span');
+        cardInfo.classList.add('card-info');
+        cardInfo.innerHTML = `<strong>${card.tema}:</strong> ${card.resposta}`;
+
+        const deleteButton = document.createElement('button');
+        deleteButton.classList.add('delete-button');
+        deleteButton.textContent = 'Excluir';
+        deleteButton.onclick = () => confirmDeleteCard(index); // Chama a confirmação de exclusão
+
+        cardItem.appendChild(cardInfo);
+        cardItem.appendChild(deleteButton);
+        customCardsListDiv.appendChild(cardItem);
+    });
+}
+
+// Função para confirmar e excluir uma carta
+function confirmDeleteCard(index) {
+    const cardToDelete = customCards[index];
+    showPopup(`Tem certeza que deseja excluir a carta "${cardToDelete.resposta}"?`, "question.png", [
+        { text: "Sim", className: "popup-ok", callback: () => deleteCustomCard(index) },
+        { text: "Não", className: "popup-cancel", callback: () => {} }
+    ]);
+}
+
+// Função para excluir uma carta
+function deleteCustomCard(index) {
+    customCards.splice(index, 1); // Remove a carta do array
+    saveCustomCards(); // Salva o array atualizado no localStorage
+    updateAllAvailableCards(); // Atualiza a lista de cartas disponíveis para o jogo
+    renderCustomCardsList(); // Re-renderiza a lista na tela
+
+    showPopup("Carta excluída com sucesso!", "success.png");
 }
