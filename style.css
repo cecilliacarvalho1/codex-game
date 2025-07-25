@@ -274,7 +274,8 @@ input[type="text"] {
 
 /* Estilos para a Tela de Criar Carta */
 #create-card-screen {
-    background-color: #d4edda; /* Cor de fundo para a tela de criação */
+    background-color: #e0f2f7; /* Um azul bem clarinho */
+    /* Ou #e3f2fd, que é um azul mais comum do Material Design light blue */
     color: #333;
 }
 #create-card-screen label {
